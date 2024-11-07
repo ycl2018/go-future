@@ -181,7 +181,7 @@ func TestCombineN(t *testing.T) {
 }
 
 func TestCombineAll(t *testing.T) {
-	all, err := CombineAll(
+	all, err := CombineAny(
 		Go(func() (value string, err error) {
 			return "v1", nil
 		}),
