@@ -30,18 +30,22 @@ func (f *Future[T]) Wait() (T, error) {
 	return f.val, f.e
 }
 
+type worker[T any] func() (T, error)
+
 // Go run function in a new goroutine. result value wrapped in Future
-func Go[T any](f func() (value T, err error)) *Future[T] {
-	var ft = &Future[T]{
+func Go[T any](w worker[T]) *Future[T] {
+	var f = &Future[T]{
 		retChan: make(chan interface{}, 2),
 	}
-	go func() {
-		val, err := f()
-		ft.retChan <- val
-		ft.retChan <- err
-		close(ft.retChan)
-	}()
-	return ft
+	go runFuture(f, w)
+	return f
+}
+
+func runFuture[T any](f *Future[T], w worker[T]) {
+	val, err := w()
+	f.retChan <- val
+	f.retChan <- err
+	close(f.retChan)
 }
 
 // T2 wrap a pair of values.
