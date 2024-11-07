@@ -96,8 +96,8 @@ type futureI interface {
 	waitUnify() ([]any, error)
 }
 
-// CombineAll futures, wait and return values by any slice with joined errors.
-func CombineAll(fs ...futureI) ([]any, error) {
+// CombineAny futures, wait and return values by any slice with joined errors.
+func CombineAny(fs ...futureI) ([]any, error) {
 	var err error
 	var ret []any
 	for _, f := range fs {

@@ -139,3 +139,41 @@ func TestThen(t *testing.T) {
 	log.Printf(wait.(string))
 }
 ```
+
+## Example4: 综合场景：通过URL下载图片
+
+这个示例说明了使用go-future方便地批量下载url二进制图片信息的方式
+
+```go
+func TestFuture(t *testing.T) {
+	var urls = []string{
+		"https://www.test.com/pic1",
+		"https://www.test.com/pic2",
+		"https://www.test.com/pic3",
+		"https://www.test.com/pic3",
+	}
+	var futures []*Future[[]byte]
+	for _, url := range urls {
+		// 启动下载任务
+		f := Go(func() ([]byte, error) {
+			resp, err := http.DefaultClient.Get(url)
+			if err != nil {
+				return nil, err
+			}
+			bytes, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			return bytes, nil
+		})
+		// 收集Futures
+		futures = append(futures, f)
+	}
+	// 合并Futures获取结果
+	ret, err := CombineN(futures...)
+	if err != nil {
+		t.Fatalf("got err:%v", err)
+	}
+	t.Log(ret)
+}
+```
