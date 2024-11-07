@@ -1,14 +1,21 @@
 # Go Future
 
-Golang Future异步模型，用于异步获取执行结果，可以使用Go启动一个goroutine，它会返回一个Future来包装结果，在需要获取结果的地方通过Wait来获取结果。
+Golang Future异步模型，用于异步获取执行结果，使用Go启动一个goroutine，它会返回一个Future来包装结果，在需要获取结果的地方通过Wait来获取结果。
 
-## Feature
+## 核心概念和使用方法
+
+- 使用`Go`创建一个Future任务
+- 使用`Wait`等待Future返回结果
+- 使用`Then`链接Future后置处理流程
+- 使用`Combine`合并多个Future返回值和错误
+
+## 核心Feature
 - [x] 支持范型，根据任务类型返回对应类型的Future，无需类型转换
-- [x] 支持多种类型：从单返回值到至多5个返回值
-- [x] 支持多次从future中获取结果，并发安全
+- [x] 支持多返回值类型任务：从单返回值到至多5个返回值
+- [x] 支持重复从future中获取结果，并发安全
 - [x] 支持combine多个任务
+- [x] 支持Then链式处理
 - [ ] 支持设置超时时间
-- [ ] 支持Then链式处理
 
 ## Install
 
@@ -18,7 +25,9 @@ go get github.com/ycl2018/go-future
 
 ## Example
 
-### Example1: 基本用法
+### Example1: 创建一个Future并等待执行结果
+
+使用`Go`创建一个Future任务，并在需要的地方获取其返回值。
 
 ```go
 package main
@@ -51,7 +60,9 @@ func main() {
 
 ```
 
-### Example2:合并多个并发的结果
+### Example2: 合并多个Future的结果
+
+使用`Combine`合并多个Future的结果和错误，一并处理
 
 ```go
 package main
@@ -73,8 +84,58 @@ func main() {
 	var f3 = Go(func() (value int, err error) {
 		return 3, nil
 	})
+
+	// 做其他事情...
+	
+	// 在需要的地方获取结果
 	v1, v2, v3, err := Combine3(f1, f2, f3)
 	log.Println(v1, v2, v3, err)
 }
+```
 
+## Example3: 使用Then链式处理任务
+
+创建Future任务后，可以使用`Then`链接后置处理任务，可以链接多个，它会返回一个新的Future任务，在需要的地方使用`Wait`获取整个链式任务的处理结果。
+
+```go
+package cc
+
+import (
+	"log"
+	"testing"
+	"time"
+
+	. "github.com/ycl2018/go-future"
+)
+
+func TestThen(t *testing.T) {
+	
+	// 链式组装一个Future任务
+	log.Printf("start program...")
+	f := Go(func() (string, error) {
+		log.Printf("start task 1...")
+		time.Sleep(time.Second)
+		return "1", nil
+	}).Then(func(str string) (any, error) {
+		log.Printf("start task 2...")
+		time.Sleep(time.Second)
+		return str + str, nil
+	}).Then(func(str any) (any, error) {
+		log.Printf("start task 3...")
+		time.Sleep(time.Second)
+		return str.(string) + str.(string), nil
+	})
+	// 做其他事情
+	log.Printf("do something else...")
+	
+	// 等待所有链式任务执行完毕
+	wait, err := f.Wait()
+	if err != nil {
+		t.Fatalf("got err:%v", err)
+	}
+	if s := wait.(string); s != "1111" {
+		t.Fatalf("got ret:%s want:%s", s, "1111")
+	}
+	log.Printf(wait.(string))
+}
 ```
