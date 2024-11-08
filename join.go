@@ -9,7 +9,7 @@ func unwrap(x []any) any {
 	return x
 }
 
-// Join wait other Future task complete and return a new combined Future2.
+// Join other Future task and return a new combined Future2.
 // if the joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
 func (f *Future[T]) Join(other futureI) *Future2[T, any] {
@@ -20,7 +20,7 @@ func (f *Future[T]) Join(other futureI) *Future2[T, any] {
 	})
 }
 
-// Join wait other Future task complete and return a new combined Future3.
+// Join other Future task and return a new combined Future3.
 // if the joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
 func (f *Future2[T, V]) Join(other futureI) *Future3[T, V, any] {
@@ -31,7 +31,7 @@ func (f *Future2[T, V]) Join(other futureI) *Future3[T, V, any] {
 	})
 }
 
-// Join wait other Future task complete and return a new combined Future4.
+// Join other Future task and return a new combined Future4.
 // if the joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
 func (f *Future3[T, V, M]) Join(other futureI) *Future4[T, V, M, any] {
@@ -42,7 +42,7 @@ func (f *Future3[T, V, M]) Join(other futureI) *Future4[T, V, M, any] {
 	})
 }
 
-// Join wait other Future task complete and return a new combined Future5.
+// Join other Future task and return a new combined Future5.
 // if the joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
 func (f *Future4[T, V, M, N]) Join(other futureI) *Future5[T, V, M, N, any] {
@@ -53,7 +53,7 @@ func (f *Future4[T, V, M, N]) Join(other futureI) *Future5[T, V, M, N, any] {
 	})
 }
 
-// Join wait other Future task complete and return a new combined Future.
+// Join other Future task and return a new combined Future.
 // in the combined Future's '[6]any',5 values before are current Future's returned values,
 // the last is the combined Future's returned values.
 func (f *Future5[T, V, M, N, O]) Join(other futureI) *Future[[6]any] {
