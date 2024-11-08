@@ -2,6 +2,7 @@ package future
 
 import (
 	"errors"
+	"log"
 	"testing"
 	"time"
 )
@@ -198,4 +199,27 @@ func TestGo5(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPanic(t *testing.T) {
+	var f = Go(func() (string, error) {
+		var s []string
+		return s[0], nil
+	})
+	_, err := f.Wait()
+	if err == nil {
+		t.Fatalf("expect panic err, but got nil")
+	}
+	log.Println(err.Error())
+}
+
+func BenchmarkFeature(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		f := Go(func() (string, error) {
+			return "bar", nil
+		})
+		f.Wait()
+	}
+	b.StopTimer()
 }
