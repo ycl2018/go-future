@@ -6,11 +6,10 @@ import (
 
 // Future wrap value which can be Wait to get.
 type Future[T any] struct {
-	retChan chan interface{}
-	val     T
-	flag    bool
-	lock    sync.Mutex
-	e       error
+	val  T
+	flag bool
+	cond *sync.Cond
+	e    error
 }
 
 func (f *Future[T]) waitUnify() ([]any, error) {
@@ -20,15 +19,11 @@ func (f *Future[T]) waitUnify() ([]any, error) {
 
 // Wait and return the value when it is ready,or else blocked
 func (f *Future[T]) Wait() (T, error) {
-	f.lock.Lock()
-	if f.flag {
-		f.lock.Unlock()
-		return f.val, f.e
+	f.cond.L.Lock()
+	if !f.flag {
+		f.cond.Wait()
 	}
-	f.val, _ = (<-f.retChan).(T)
-	f.e, _ = (<-f.retChan).(error)
-	f.flag = true
-	f.lock.Unlock()
+	f.cond.L.Unlock()
 	return f.val, f.e
 }
 
@@ -36,18 +31,19 @@ type worker[T any] func() (T, error)
 
 // Go run function in a new goroutine. result value wrapped in Future
 func Go[T any](w worker[T]) *Future[T] {
-	var f = &Future[T]{
-		retChan: make(chan interface{}, 2),
-	}
+	var f = &Future[T]{cond: sync.NewCond(&sync.Mutex{})}
 	go runFuture(f, w)
 	return f
 }
 
 func runFuture[T any](f *Future[T], w worker[T]) {
 	val, err := w()
-	f.retChan <- val
-	f.retChan <- err
-	close(f.retChan)
+	f.cond.L.Lock()
+	f.val = val
+	f.e = err
+	f.flag = true
+	f.cond.Broadcast()
+	f.cond.L.Unlock()
 }
 
 // T2 wrap a pair of values.
