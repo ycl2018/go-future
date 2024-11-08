@@ -6,6 +6,16 @@ import (
 	"time"
 )
 
+var debugMode = false
+
+func consumeTime(duration time.Duration) {
+	if debugMode {
+		time.Sleep(duration)
+	} else {
+		return
+	}
+}
+
 func TestGo(t *testing.T) {
 	var cases = []struct {
 		name string
@@ -18,7 +28,7 @@ func TestGo(t *testing.T) {
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
 			go1 := Go(func() (t int, err error) {
-				time.Sleep(100 * time.Millisecond)
+				consumeTime(100 * time.Millisecond)
 				return s.val, s.err
 			})
 			for i := 0; i < 10; i++ {
@@ -47,7 +57,7 @@ func TestGo2(t *testing.T) {
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
 			go2 := Go2(func() (t int, t2 string, err error) {
-				time.Sleep(100 * time.Millisecond)
+				consumeTime(100 * time.Millisecond)
 				return s.retV1, s.retV2, s.err
 			})
 			for i := 0; i < 10; i++ {
@@ -84,7 +94,7 @@ func TestGo3(t *testing.T) {
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
 			go3 := Go3(func() (int, string, string, error) {
-				time.Sleep(100 * time.Millisecond)
+				consumeTime(100 * time.Millisecond)
 				return s.retV1, s.retV2, s.retV3, s.err
 			})
 			for i := 0; i < 10; i++ {
@@ -121,7 +131,7 @@ func TestGo4(t *testing.T) {
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
 			go4 := Go4(func() (int, string, string, *string, error) {
-				time.Sleep(100 * time.Millisecond)
+				consumeTime(100 * time.Millisecond)
 				return s.retV1, s.retV2, s.retV3, s.retV4, s.err
 			})
 			for i := 0; i < 10; i++ {
@@ -162,7 +172,7 @@ func TestGo5(t *testing.T) {
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
 			go5 := Go5(func() (int, string, string, *string, *string, error) {
-				time.Sleep(100 * time.Millisecond)
+				consumeTime(100 * time.Millisecond)
 				return s.retV1, s.retV2, s.retV3, s.retV4, s.retV5, s.err
 			})
 			for i := 0; i < 10; i++ {

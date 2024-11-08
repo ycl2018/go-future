@@ -1,6 +1,8 @@
 package cc
 
-import "sync"
+import (
+	"sync"
+)
 
 // Future wrap value which can be Wait to get.
 type Future[T any] struct {
@@ -56,7 +58,7 @@ type T2[T, V any] struct {
 
 // Future2 wrap 2 values which can be Wait to get.
 type Future2[T, V any] struct {
-	f *Future[T2[T, V]]
+	f *Future[any]
 }
 
 func (f *Future2[T, V]) waitUnify() ([]any, error) {
@@ -66,13 +68,14 @@ func (f *Future2[T, V]) waitUnify() ([]any, error) {
 
 // Wait and return the values when they are ready,or else blocked
 func (f *Future2[T, V]) Wait() (T, V, error) {
-	t2, err := f.f.Wait()
+	t, err := f.f.Wait()
+	t2 := t.(T2[T, V])
 	return t2.V1, t2.V2, err
 }
 
 // Go2 run function in a new goroutine.2 result values wrapped in Future2
 func Go2[T, V any](f func() (T, V, error)) *Future2[T, V] {
-	ret := Go(func() (T2[T, V], error) {
+	ret := Go(func() (any, error) {
 		v1, v2, err := f()
 		var ret T2[T, V]
 		ret.V1 = v1
@@ -93,7 +96,7 @@ type T3[T, V, M any] struct {
 
 // Future3 wrap 3 values which can be Wait to get.
 type Future3[T, V, M any] struct {
-	f *Future[T3[T, V, M]]
+	f *Future[any]
 }
 
 func (f *Future3[T, V, M]) waitUnify() ([]any, error) {
@@ -103,13 +106,14 @@ func (f *Future3[T, V, M]) waitUnify() ([]any, error) {
 
 // Wait and return the values when they are ready,or else blocked
 func (f *Future3[T, V, M]) Wait() (T, V, M, error) {
-	t3, err := f.f.Wait()
+	t, err := f.f.Wait()
+	t3 := t.(T3[T, V, M])
 	return t3.V1, t3.V2, t3.V3, err
 }
 
 // Go3 run function in a new goroutine. 3 result values wrapped in Future3
 func Go3[T, V, M any](f func() (T, V, M, error)) *Future3[T, V, M] {
-	ret := Go(func() (T3[T, V, M], error) {
+	ret := Go(func() (any, error) {
 		v1, v2, v3, err := f()
 		var ret T3[T, V, M]
 		ret.V1 = v1
@@ -132,7 +136,7 @@ type T4[T, V, M, N any] struct {
 
 // Future4 wrap 4 values which can be Wait to get.
 type Future4[T, V, M, N any] struct {
-	f *Future[T4[T, V, M, N]]
+	f *Future[any]
 }
 
 func (f *Future4[T, V, M, N]) waitUnify() ([]any, error) {
@@ -142,13 +146,14 @@ func (f *Future4[T, V, M, N]) waitUnify() ([]any, error) {
 
 // Wait and return the values when they are ready,or else blocked
 func (f *Future4[T, V, M, N]) Wait() (T, V, M, N, error) {
-	t4, err := f.f.Wait()
+	t, err := f.f.Wait()
+	t4 := t.(T4[T, V, M, N])
 	return t4.V1, t4.V2, t4.V3, t4.V4, err
 }
 
 // Go4 run function in a new goroutine. 4 result values wrapped in Future4
 func Go4[T, V, M, N any](f func() (T, V, M, N, error)) *Future4[T, V, M, N] {
-	ret := Go(func() (T4[T, V, M, N], error) {
+	ret := Go(func() (any, error) {
 		v1, v2, v3, v4, err := f()
 		var ret T4[T, V, M, N]
 		ret.V1 = v1
@@ -173,7 +178,7 @@ type T5[T, V, M, N, O any] struct {
 
 // Future5 wrap 5 values which can be Wait to get.
 type Future5[T, V, M, N, O any] struct {
-	f *Future[T5[T, V, M, N, O]]
+	f *Future[any]
 }
 
 func (f *Future5[T, V, M, N, O]) waitUnify() ([]any, error) {
@@ -183,13 +188,14 @@ func (f *Future5[T, V, M, N, O]) waitUnify() ([]any, error) {
 
 // Wait and return the values when they are ready,or else blocked
 func (f *Future5[T, V, M, N, O]) Wait() (T, V, M, N, O, error) {
-	t5, err := f.f.Wait()
+	t, err := f.f.Wait()
+	t5 := t.(T5[T, V, M, N, O])
 	return t5.V1, t5.V2, t5.V3, t5.V4, t5.V5, err
 }
 
 // Go5 run function in a new goroutine. 5 result values wrapped in Future5
 func Go5[T, V, M, N, O any](f func() (T, V, M, N, O, error)) *Future5[T, V, M, N, O] {
-	ret := Go(func() (T5[T, V, M, N, O], error) {
+	ret := Go(func() (any, error) {
 		v1, v2, v3, v4, v5, err := f()
 		var ret T5[T, V, M, N, O]
 		ret.V1 = v1
