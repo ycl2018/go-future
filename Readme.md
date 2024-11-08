@@ -1,5 +1,7 @@
 # Go Future
 
+[![Build Status](https://github.com/ycl2018/go-future/actions/workflows/test.yml/badge.svg?branch=main)][actions]
+
 Golang Future异步模型，用于异步获取执行结果，使用Go启动一个goroutine，它会返回一个Future来包装结果，在需要获取结果的地方通过Wait来获取结果。
 
 ## 核心概念和使用方法
