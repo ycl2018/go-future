@@ -9,23 +9,7 @@ var ErrTimeout = errors.New("[Future] err: wait/JoinTimeout timeout")
 
 // WaitTimeout wait for timeout duration to get result otherwise an ErrTimeout will be returned.
 func (f *Future[T]) WaitTimeout(timeout time.Duration) (T, error) {
-	if timeout <= 0 {
-		return f.WaitTimeout(timeout)
-	}
-
-	var getRet = make(chan T2[T, error])
-	go func() {
-		ret, err := f.WaitTimeout(timeout)
-		getRet <- T2[T, error]{ret, err}
-	}()
-
-	select {
-	case <-time.NewTimer(timeout).C:
-		var t T
-		return t, ErrTimeout
-	case ret := <-getRet:
-		return ret.V1, ret.V2
-	}
+	return Timeout(timeout, f.Wait)
 }
 
 // WaitTimeout wait for timeout duration to get result otherwise an ErrTimeout will be returned.
@@ -77,8 +61,8 @@ func (f *Future5[T, V, M, N, O]) WaitTimeout(timeout time.Duration) (T, V, M, N,
 // or else it's real type is []any.
 func (f *Future[T]) JoinTimeout(other futureI, timeout time.Duration) *Future2[T, any] {
 	return Go2(func() (T, any, error) {
-		val1, err1 := f.WaitTimeout(timeout)
-		val2, err2 := other.waitUnify()
+		val1, err1 := f.Wait()
+		val2, err2 := other.waitTimeout(timeout)
 		return val1, unwrap(val2), errors.Join(err1, err2)
 	})
 }
@@ -88,8 +72,8 @@ func (f *Future[T]) JoinTimeout(other futureI, timeout time.Duration) *Future2[T
 // or else it's real type is []any.
 func (f *Future2[T, V]) JoinTimeout(other futureI, timeout time.Duration) *Future3[T, V, any] {
 	return Go3(func() (T, V, any, error) {
-		val1, val2, err1 := f.WaitTimeout(timeout)
-		val3, err2 := other.waitUnify()
+		val1, val2, err1 := f.Wait()
+		val3, err2 := other.waitTimeout(timeout)
 		return val1, val2, unwrap(val3), errors.Join(err1, err2)
 	})
 }
@@ -99,8 +83,8 @@ func (f *Future2[T, V]) JoinTimeout(other futureI, timeout time.Duration) *Futur
 // or else it's real type is []any.
 func (f *Future3[T, V, M]) JoinTimeout(other futureI, timeout time.Duration) *Future4[T, V, M, any] {
 	return Go4(func() (T, V, M, any, error) {
-		val1, val2, val3, err1 := f.WaitTimeout(timeout)
-		val4, err2 := other.waitUnify()
+		val1, val2, val3, err1 := f.Wait()
+		val4, err2 := other.waitTimeout(timeout)
 		return val1, val2, val3, unwrap(val4), errors.Join(err1, err2)
 	})
 }
@@ -110,8 +94,8 @@ func (f *Future3[T, V, M]) JoinTimeout(other futureI, timeout time.Duration) *Fu
 // or else it's real type is []any.
 func (f *Future4[T, V, M, N]) JoinTimeout(other futureI, timeout time.Duration) *Future5[T, V, M, N, any] {
 	return Go5(func() (T, V, M, N, any, error) {
-		val1, val2, val3, val4, err1 := f.WaitTimeout(timeout)
-		val5, err2 := other.waitUnify()
+		val1, val2, val3, val4, err1 := f.Wait()
+		val5, err2 := other.waitTimeout(timeout)
 		return val1, val2, val3, val4, unwrap(val5), errors.Join(err1, err2)
 	})
 }
@@ -121,8 +105,27 @@ func (f *Future4[T, V, M, N]) JoinTimeout(other futureI, timeout time.Duration) 
 // the last is the combined Future's returned values.
 func (f *Future5[T, V, M, N, O]) JoinTimeout(other futureI, timeout time.Duration) *Future[[6]any] {
 	return Go(func() ([6]any, error) {
-		val1, val2, val3, val4, val5, err1 := f.WaitTimeout(timeout)
-		val6, err2 := other.waitUnify()
+		val1, val2, val3, val4, val5, err1 := f.Wait()
+		val6, err2 := other.waitTimeout(timeout)
 		return [...]any{val1, val2, val3, val4, val5, unwrap(val6)}, errors.Join(err1, err2)
 	})
+}
+
+func Timeout[T any](timeout time.Duration, f func() (T, error)) (T, error) {
+	if timeout <= 0 {
+		return f()
+	}
+	var getRet = make(chan T2[T, error])
+	go func() {
+		ret, err := f()
+		getRet <- T2[T, error]{ret, err}
+	}()
+
+	select {
+	case <-time.NewTimer(timeout).C:
+		var t T
+		return t, ErrTimeout
+	case ret := <-getRet:
+		return ret.V1, ret.V2
+	}
 }

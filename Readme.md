@@ -15,10 +15,10 @@ Golang Future异步模型，用于异步获取执行结果，使用Go启动一�
 - [x] 支持多返回值类型任务：从单返回值到至多5个返回值
 - [x] 支持重复从future中获取结果，并发安全
 - [x] 支持Combine多个Future任务，等待完成并合并结果和错误
-- [x] 支持Then链式处理回调函数
-- [x] 支持Join链式等待其他Future任务
+- [x] 支持Then链接其他Future任务
+- [x] 支持链式Join其他Future任务
 - [ ] 支持在链路节点发生错误时处理
-- [ ] 支持设置超时时间
+- [x] 支持设置超时时间
 
 ## Install
 
@@ -39,12 +39,12 @@ import (
 	"log"
 	"time"
 
-	gf "github.com/ycl2018/go-future"
+	. "github.com/ycl2018/go-future"
 )
 
 func main() {
 	// 启动异步任务
-	future := gf.Go(func() (value string, err error) {
+	future := Go(func() (value string, err error) {
 		// take a long time to complete
 		time.Sleep(1 * time.Second)
 		return "complete", nil
@@ -173,7 +173,7 @@ func TestFuture(t *testing.T) {
 		futures = append(futures, f)
 	}
 	// 合并Futures获取结果
-	ret, err := CombineN(futures...)
+	ret, err := CombineSame(futures...)
 	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
