@@ -1,6 +1,8 @@
 package future
 
 import (
+	"fmt"
+	"runtime/debug"
 	"sync"
 )
 
@@ -37,13 +39,20 @@ func Go[T any](w worker[T]) *Future[T] {
 }
 
 func runFuture[T any](f *Future[T], w worker[T]) {
-	val, err := w()
-	f.cond.L.Lock()
-	f.val = val
-	f.e = err
-	f.flag = true
-	f.cond.Broadcast()
-	f.cond.L.Unlock()
+	var err error
+	var val T
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("[Future] recover:%v. Stack:%s", e, debug.Stack())
+		}
+		f.cond.L.Lock()
+		f.val = val
+		f.e = err
+		f.flag = true
+		f.cond.Broadcast()
+		f.cond.L.Unlock()
+	}()
+	val, err = w()
 }
 
 // T2 wrap a pair of values.
