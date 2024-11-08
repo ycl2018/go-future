@@ -173,7 +173,7 @@ func TestFuture(t *testing.T) {
 		futures = append(futures, f)
 	}
 	// 合并Futures获取结果
-	ret, err := CombineN(futures...)
+	ret, err := CombineSame(futures...)
 	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}

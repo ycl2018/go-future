@@ -122,7 +122,7 @@ func CombineAll(fs ...futureI) ([]any, error) {
 	return ret, err
 }
 
-// CombineAll futures, wait for timeout duration and return all values and joined errors,
+// CombineAllTimeout combine futures, wait for timeout duration and return all values and joined errors,
 // otherwise an ErrTimeout returnd
 func CombineAllTimeout(timeout time.Duration, fs ...futureI) ([]any, error) {
 	return Timeout(timeout, func() ([]any, error) {
