@@ -1,6 +1,7 @@
 package future
 
 import (
+	"errors"
 	"log"
 	"testing"
 	"time"
@@ -94,4 +95,34 @@ func TestJoin6(t *testing.T) {
 		t.Fatalf("got:%s,want:%s", val, "111112")
 	}
 	log.Println("got result:" + val.(string))
+}
+
+func TestJoinErr(t *testing.T) {
+	var mockErr1 = errors.New("mock err 1")
+	var mockErr2 = errors.New("mock err 2")
+	log.Println("program starting...")
+	f1 := Go(func() (string, error) {
+		log.Println("f1 starting...")
+		consumeTime(time.Second)
+		return "1", mockErr1
+	})
+	f2 := Go(func() (string, error) {
+		log.Println("f2 starting...")
+		consumeTime(time.Second)
+		return "2", mockErr2
+	})
+	f3 := f2.Join(f1).Then(func(v1 string, v2 any) (any, error) {
+		log.Println("f3 starting...")
+		consumeTime(time.Second)
+		str2 := v2.(string)
+		return v1 + str2, nil
+	})
+	log.Printf("do something else")
+	val, err := f3.Wait()
+	if val != nil {
+		t.Fatalf("want nil,but got %v", val)
+	}
+	if !errors.Is(err, mockErr1) || !errors.Is(err, mockErr2) {
+		t.Fatalf("want err:%v,but got:%v", errors.Join(mockErr1, mockErr2), err)
+	}
 }
