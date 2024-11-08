@@ -159,7 +159,7 @@ func TestCombine10(t *testing.T) {
 }
 
 func TestCombineN(t *testing.T) {
-	vv, err := CombineN(
+	vv, err := CombineSame(
 		Go(func() (value string, err error) {
 			return "v1", nil
 		}),

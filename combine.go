@@ -85,8 +85,8 @@ func Combine10[T, V, M, N, O, P, Q, R, S, U any](f1 *Future[T], f2 *Future[V], f
 	return v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, err
 }
 
-// CombineN futures which return same type, wait and return all values with joined errors.
-func CombineN[T any](fs ...*Future[T]) ([]T, error) {
+// CombineSame futures which return same type, wait and return all values with joined errors.
+func CombineSame[T any](fs ...*Future[T]) ([]T, error) {
 	var err error
 	var ret []T
 	for _, f := range fs {
@@ -97,11 +97,11 @@ func CombineN[T any](fs ...*Future[T]) ([]T, error) {
 	return ret, err
 }
 
-// CombineN futures which return same type, wait for timeout duration and return all values with joined errors,
+// CombineSameTimeout combine futures which return same type, wait for timeout duration and return all values with joined errors,
 // otherwise an ErrTimeout returnd
-func CombineNTimeout[T any](timeout time.Duration, fs ...*Future[T]) ([]T, error) {
+func CombineSameTimeout[T any](timeout time.Duration, fs ...*Future[T]) ([]T, error) {
 	return Timeout(timeout, func() ([]T, error) {
-		return CombineN(fs...)
+		return CombineSame(fs...)
 	})
 }
 
