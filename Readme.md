@@ -73,7 +73,7 @@ package main
 import (
 	"log"
 
-	. "github.com/ycl2018/go-future"
+	. "github.com/ycl2018/go-future/future"
 )
 
 func main() {
@@ -108,7 +108,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/ycl2018/go-future"
+	. "github.com/ycl2018/go-future/future"
 )
 
 func TestThen(t *testing.T) {
