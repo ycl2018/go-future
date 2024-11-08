@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"sync"
+	"time"
 )
 
 // Future wrap value which can be Wait to get.
@@ -16,6 +17,11 @@ type Future[T any] struct {
 
 func (f *Future[T]) waitUnify() ([]any, error) {
 	val, err := f.Wait()
+	return []any{val}, err
+}
+
+func (f *Future[T]) waitTimeout(timeout time.Duration) ([]any, error) {
+	val, err := Timeout(timeout, f.Wait)
 	return []any{val}, err
 }
 
@@ -71,6 +77,11 @@ func (f *Future2[T, V]) waitUnify() ([]any, error) {
 	return []any{val1, val2}, err
 }
 
+func (f *Future2[T, V]) waitTimeout(timeout time.Duration) ([]any, error) {
+	val1, val2, err := f.WaitTimeout(timeout)
+	return []any{val1, val2}, err
+}
+
 // Wait and return the values when they are ready,or else blocked
 func (f *Future2[T, V]) Wait() (T, V, error) {
 	t, err := f.f.Wait()
@@ -106,6 +117,11 @@ type Future3[T, V, M any] struct {
 
 func (f *Future3[T, V, M]) waitUnify() ([]any, error) {
 	val1, val2, val3, err := f.Wait()
+	return []any{val1, val2, val3}, err
+}
+
+func (f *Future3[T, V, M]) waitTimeout(timeout time.Duration) ([]any, error) {
+	val1, val2, val3, err := f.WaitTimeout(timeout)
 	return []any{val1, val2, val3}, err
 }
 
@@ -149,6 +165,11 @@ func (f *Future4[T, V, M, N]) waitUnify() ([]any, error) {
 	return []any{val1, val2, val3, val4}, err
 }
 
+func (f *Future4[T, V, M, N]) waitTimeout(timeout time.Duration) ([]any, error) {
+	val1, val2, val3, val4, err := f.WaitTimeout(timeout)
+	return []any{val1, val2, val3, val4}, err
+}
+
 // Wait and return the values when they are ready,or else blocked
 func (f *Future4[T, V, M, N]) Wait() (T, V, M, N, error) {
 	t, err := f.f.Wait()
@@ -188,6 +209,11 @@ type Future5[T, V, M, N, O any] struct {
 
 func (f *Future5[T, V, M, N, O]) waitUnify() ([]any, error) {
 	val1, val2, val3, val4, val5, err := f.Wait()
+	return []any{val1, val2, val3, val4, val5}, err
+}
+
+func (f *Future5[T, V, M, N, O]) waitTimeout(timeout time.Duration) ([]any, error) {
+	val1, val2, val3, val4, val5, err := f.WaitTimeout(timeout)
 	return []any{val1, val2, val3, val4, val5}, err
 }
 

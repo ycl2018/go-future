@@ -3,6 +3,7 @@ package future
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 func TestCombine(t *testing.T) {
@@ -181,7 +182,7 @@ func TestCombineN(t *testing.T) {
 }
 
 func TestCombineAll(t *testing.T) {
-	all, err := CombineAny(
+	all, err := CombineAll(
 		Go(func() (value string, err error) {
 			return "v1", nil
 		}),
@@ -200,5 +201,68 @@ func TestCombineAll(t *testing.T) {
 		if want[i] != s {
 			t.Fatalf("num:%d want:%s but get:%s", i, want[i], s)
 		}
+	}
+}
+
+func TestWaitOneOf(t *testing.T) {
+	f1 := Go(func() (value string, err error) {
+		time.Sleep(20 * time.Millisecond)
+		return "1", nil
+	})
+	f2 := Go(func() (value string, err error) {
+		time.Sleep(40 * time.Millisecond)
+		return "2", nil
+	})
+	f3 := Go(func() (value string, err error) {
+		time.Sleep(60 * time.Millisecond)
+		return "3", nil
+	})
+	ret, err := WaitOneOf(f1, f2, f3)
+	if err != nil {
+		t.Fatalf("got err:%v", err)
+	}
+	if ret != "1" {
+		t.Fatalf("want ret:%s,but got:%s", "1", ret)
+	}
+}
+
+func TestWaitOneOfTimeout(t *testing.T) {
+	f1 := Go(func() (value string, err error) {
+		time.Sleep(20 * time.Millisecond)
+		return "1", nil
+	})
+	f2 := Go(func() (value string, err error) {
+		time.Sleep(40 * time.Millisecond)
+		return "2", nil
+	})
+	f3 := Go(func() (value string, err error) {
+		time.Sleep(60 * time.Millisecond)
+		return "3", nil
+	})
+	ret, err := WaitOneOfTimeout(5*time.Millisecond, f1, f2, f3)
+	if ret != "" {
+		t.Fatalf("want empty string, but got:%s", ret)
+	}
+	if !errors.Is(err, ErrTimeout) {
+		t.Fatalf("expect timeout err, but got:%v", err)
+	}
+}
+
+func TestCominAllTimeout(t *testing.T) {
+	f1 := Go(func() (value string, err error) {
+		time.Sleep(20 * time.Millisecond)
+		return "1", nil
+	})
+	f2 := Go(func() (value string, err error) {
+		time.Sleep(40 * time.Millisecond)
+		return "2", nil
+	})
+	f3 := Go(func() (value string, err error) {
+		time.Sleep(60 * time.Millisecond)
+		return "3", nil
+	})
+	_, err := CombineAllTimeout(5*time.Millisecond, f1, f2, f3)
+	if !errors.Is(err, ErrTimeout) {
+		t.Fatalf("expect timeout err, but got:%v", err)
 	}
 }

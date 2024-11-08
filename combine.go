@@ -1,6 +1,11 @@
 package future
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
+
+var ErrAllFailed = errors.New("[Future] err: all futures failed")
 
 // Combine 2 futures, wait and return values with joined errors.
 func Combine[T, V any](f1 *Future[T], f2 *Future[V]) (T, V, error) {
@@ -80,7 +85,7 @@ func Combine10[T, V, M, N, O, P, Q, R, S, U any](f1 *Future[T], f2 *Future[V], f
 	return v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, err
 }
 
-// CombineN futures which return same type, wait and return values with joined errors.
+// CombineN futures which return same type, wait and return all values with joined errors.
 func CombineN[T any](fs ...*Future[T]) ([]T, error) {
 	var err error
 	var ret []T
@@ -92,12 +97,21 @@ func CombineN[T any](fs ...*Future[T]) ([]T, error) {
 	return ret, err
 }
 
-type futureI interface {
-	waitUnify() ([]any, error)
+// CombineN futures which return same type, wait for timeout duration and return all values with joined errors,
+// otherwise an ErrTimeout returnd
+func CombineNTimeout[T any](timeout time.Duration, fs ...*Future[T]) ([]T, error) {
+	return Timeout(timeout, func() ([]T, error) {
+		return CombineN(fs...)
+	})
 }
 
-// CombineAny futures, wait and return values by any slice with joined errors.
-func CombineAny(fs ...futureI) ([]any, error) {
+type futureI interface {
+	waitUnify() ([]any, error)
+	waitTimeout(time.Duration) ([]any, error)
+}
+
+// CombineAll futures, wait and return all values and joined errors.
+func CombineAll(fs ...futureI) ([]any, error) {
 	var err error
 	var ret []any
 	for _, f := range fs {
@@ -106,4 +120,32 @@ func CombineAny(fs ...futureI) ([]any, error) {
 		ret = append(ret, v...)
 	}
 	return ret, err
+}
+
+// CombineAll futures, wait for timeout duration and return all values and joined errors,
+// otherwise an ErrTimeout returnd
+func CombineAllTimeout(timeout time.Duration, fs ...futureI) ([]any, error) {
+	return Timeout(timeout, func() ([]any, error) {
+		return CombineAll(fs...)
+	})
+}
+
+// WaitOneOf futures and return as soon as any one succeeds.
+func WaitOneOf[T any](fs ...*Future[T]) (T, error) {
+	for _, f := range fs {
+		ret, err := f.Wait()
+		if err == nil {
+			return ret, nil
+		}
+	}
+	var t T
+	return t, ErrAllFailed
+}
+
+// WaitOneOfTimeout wait for timeout duration and return as soon as any one of Futures succeeds
+// otherwise an ErrTimeout returned.
+func WaitOneOfTimeout[T any](timeout time.Duration, fs ...*Future[T]) (T, error) {
+	return Timeout(timeout, func() (T, error) {
+		return WaitOneOf(fs...)
+	})
 }
