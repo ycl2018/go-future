@@ -1,4 +1,4 @@
-package cc
+package future
 
 import (
 	"sync"
