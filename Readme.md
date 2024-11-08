@@ -39,12 +39,12 @@ import (
 	"log"
 	"time"
 
-	gf "github.com/ycl2018/go-future"
+	. "github.com/ycl2018/go-future"
 )
 
 func main() {
 	// 启动异步任务
-	future := gf.Go(func() (value string, err error) {
+	future := Go(func() (value string, err error) {
 		// take a long time to complete
 		time.Sleep(1 * time.Second)
 		return "complete", nil
