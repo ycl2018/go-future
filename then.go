@@ -1,4 +1,4 @@
-package cc
+package future
 
 // Then compose other function which run after this Future returns, and return a new Future.
 func (f *Future[T]) Then(w func(T) (any, error)) *Future[any] {

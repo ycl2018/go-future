@@ -101,7 +101,7 @@ func main() {
 创建Future任务后，可以使用`Then`链接后置处理任务，可以链接多个，它会返回一个新的Future任务，在需要的地方使用`Wait`获取整个链式任务的处理结果。
 
 ```go
-package cc
+package future
 
 import (
 	"log"
