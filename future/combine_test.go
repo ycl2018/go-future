@@ -217,7 +217,7 @@ func TestWaitOneOf(t *testing.T) {
 		time.Sleep(60 * time.Millisecond)
 		return "3", nil
 	})
-	ret, err := WaitOneOf(f1, f2, f3)
+	ret, err := CombineAny(f1, f2, f3)
 	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
@@ -239,7 +239,7 @@ func TestWaitOneOfTimeout(t *testing.T) {
 		time.Sleep(60 * time.Millisecond)
 		return "3", nil
 	})
-	ret, err := WaitOneOfTimeout(5*time.Millisecond, f1, f2, f3)
+	ret, err := CombineAnyTimeout(5*time.Millisecond, f1, f2, f3)
 	if ret != "" {
 		t.Fatalf("want empty string, but got:%s", ret)
 	}
