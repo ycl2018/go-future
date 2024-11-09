@@ -130,8 +130,8 @@ func CombineAllTimeout(timeout time.Duration, fs ...futureI) ([]any, error) {
 	})
 }
 
-// WaitOneOf futures and return as soon as any one succeeds.
-func WaitOneOf[T any](fs ...*Future[T]) (T, error) {
+// CombineAny futures and return as soon as any one succeeds.
+func CombineAny[T any](fs ...*Future[T]) (T, error) {
 	for _, f := range fs {
 		ret, err := f.Wait()
 		if err == nil {
@@ -142,10 +142,10 @@ func WaitOneOf[T any](fs ...*Future[T]) (T, error) {
 	return t, ErrAllFailed
 }
 
-// WaitOneOfTimeout wait for timeout duration and return as soon as any one of Futures succeeds
+// CombineAnyTimeout wait for timeout duration and return as soon as any one of Futures succeeds
 // otherwise an ErrTimeout returned.
-func WaitOneOfTimeout[T any](timeout time.Duration, fs ...*Future[T]) (T, error) {
+func CombineAnyTimeout[T any](timeout time.Duration, fs ...*Future[T]) (T, error) {
 	return Timeout(timeout, func() (T, error) {
-		return WaitOneOf(fs...)
+		return CombineAny(fs...)
 	})
 }
