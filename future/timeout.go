@@ -56,61 +56,67 @@ func (f *Future5[T, V, M, N, O]) WaitTimeout(timeout time.Duration) (T, V, M, N,
 	return r.V1, r.V2, r.V3, r.V4, r.V5, err
 }
 
-// JoinTimeout wait for timeout duration to join other Future task and return a new combined Future2.
+// JoinTimeout wait for the duration of this Future t1 and the other t2,
+// combine both returned values and return a new combined value Future2.
 // if the Joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
-func (f *Future[T]) JoinTimeout(other futureI, timeout time.Duration) *Future2[T, any] {
+func (f *Future[T]) JoinTimeout(other futureI, t1, t2 time.Duration) *Future2[T, any] {
 	return Go2(func() (T, any, error) {
-		val1, err1 := f.Wait()
-		val2, err2 := other.waitTimeout(timeout)
+		val1, err1 := f.WaitTimeout(t1)
+		val2, err2 := other.waitTimeout(t2)
 		return val1, unwrap(val2), errors.Join(err1, err2)
 	})
 }
 
-// JoinTimeout wait for timeout duration to join other Future task and return a new combined Future3.
+// JoinTimeout wait for the duration of this Future t1 and the other t2,
+// combine both returned values and return a new combined value Future2.
 // if the Joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
-func (f *Future2[T, V]) JoinTimeout(other futureI, timeout time.Duration) *Future3[T, V, any] {
+func (f *Future2[T, V]) JoinTimeout(other futureI, t1, t2 time.Duration) *Future3[T, V, any] {
 	return Go3(func() (T, V, any, error) {
-		val1, val2, err1 := f.Wait()
-		val3, err2 := other.waitTimeout(timeout)
+		val1, val2, err1 := f.WaitTimeout(t1)
+		val3, err2 := other.waitTimeout(t2)
 		return val1, val2, unwrap(val3), errors.Join(err1, err2)
 	})
 }
 
-// JoinTimeout wait for timeout duration to join other Future task and return a new combined Future4.
+// JoinTimeout wait for the duration of this Future t1 and the other t2,
+// combine both returned values and return a new combined value Future2.
 // if the Joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
-func (f *Future3[T, V, M]) JoinTimeout(other futureI, timeout time.Duration) *Future4[T, V, M, any] {
+func (f *Future3[T, V, M]) JoinTimeout(other futureI, t1, t2 time.Duration) *Future4[T, V, M, any] {
 	return Go4(func() (T, V, M, any, error) {
-		val1, val2, val3, err1 := f.Wait()
-		val4, err2 := other.waitTimeout(timeout)
+		val1, val2, val3, err1 := f.WaitTimeout(t1)
+		val4, err2 := other.waitTimeout(t2)
 		return val1, val2, val3, unwrap(val4), errors.Join(err1, err2)
 	})
 }
 
-// JoinTimeout wait for timeout duration to join other Future task and return a new combined Future5.
+// JoinTimeout wait for the duration of this Future t1 and the other t2,
+// combine both returned values and return a new combined value Future2.
 // if the Joined Future return one value, combined Future's type 'any' will be the value exactly,
 // or else it's real type is []any.
-func (f *Future4[T, V, M, N]) JoinTimeout(other futureI, timeout time.Duration) *Future5[T, V, M, N, any] {
+func (f *Future4[T, V, M, N]) JoinTimeout(other futureI, t1, t2 time.Duration) *Future5[T, V, M, N, any] {
 	return Go5(func() (T, V, M, N, any, error) {
-		val1, val2, val3, val4, err1 := f.Wait()
-		val5, err2 := other.waitTimeout(timeout)
+		val1, val2, val3, val4, err1 := f.WaitTimeout(t1)
+		val5, err2 := other.waitTimeout(t2)
 		return val1, val2, val3, val4, unwrap(val5), errors.Join(err1, err2)
 	})
 }
 
-// JoinTimeout wait for timeout duration to join other Future task and return a new combined Future.
-// in the combined Future's '[6]any',5 values before are current Future's returned values,
-// the last is the combined Future's returned values.
-func (f *Future5[T, V, M, N, O]) JoinTimeout(other futureI, timeout time.Duration) *Future[[6]any] {
+// JoinTimeout wait for the duration of this Future t1 and the other t2,
+// combine both returned values and return a new combined value Future2.
+// if the Joined Future return one value, combined Future's type 'any' will be the value exactly,
+// or else it's real type is []any.
+func (f *Future5[T, V, M, N, O]) JoinTimeout(other futureI, t1, t2 time.Duration) *Future[[6]any] {
 	return Go(func() ([6]any, error) {
-		val1, val2, val3, val4, val5, err1 := f.Wait()
-		val6, err2 := other.waitTimeout(timeout)
+		val1, val2, val3, val4, val5, err1 := f.WaitTimeout(t1)
+		val6, err2 := other.waitTimeout(t2)
 		return [...]any{val1, val2, val3, val4, val5, unwrap(val6)}, errors.Join(err1, err2)
 	})
 }
 
+// Timeout wait for 'timeout' duration to get the function f return,if not an ErrTimeout returned
 func Timeout[T any](timeout time.Duration, f func() (T, error)) (T, error) {
 	if timeout <= 0 {
 		return f()
