@@ -55,8 +55,8 @@ func runFuture[T any](f *Future[T], w worker[T]) {
 		f.val = val
 		f.e = err
 		f.flag = true
-		f.cond.Broadcast()
 		f.cond.L.Unlock()
+		f.cond.Broadcast()
 	}()
 	val, err = w()
 }
