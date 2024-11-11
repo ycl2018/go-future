@@ -15,11 +15,11 @@ Golang Future异步模型，用于异步获取执行结果，使用Go启动一�
 
 - [x] 支持范型，根据任务类型返回对应类型的Future，无需类型转换
 - [x] 支持多返回值类型任务：从单返回值到至多5个返回值
-- [x] 支持重复从future中获取结果，并发安全
-- [x] 支持Combine多个Future任务，等待完成并合并结果和错误
-- [x] 支持Then链接其他Future任务
-- [x] 支持链式Join其他Future任务
-- [ ] 支持在链路节点发生错误时处理
+- [x] 支持重复从future中`Wait`获取结果，并发安全
+- [x] 支持`Combine`多个Future任务，等待完成并合并结果和错误
+- [x] 支持`WhenComplete`在链路节点完成时进行错误处理/结果检查
+- [x] 支持`Then`链接其他Future任务
+- [x] 支持链式`Join`其他Future任务
 - [x] 支持设置超时时间
 
 ## Install
