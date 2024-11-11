@@ -49,7 +49,7 @@ func TestJoinTimeout(t *testing.T) {
 	f2 := Go(func() (string, error) {
 		return "var", nil
 	})
-	f3 := f2.JoinTimeout(f1, 50*time.Millisecond).Then(func(f1Ret string, f2Ret any) (any, error) {
+	f3 := f2.JoinTimeout(f1, 0, 50*time.Millisecond).Then(func(f1Ret string, f2Ret any) (any, error) {
 		return T2[string, any]{f1Ret, f2Ret}, nil
 	})
 	_, err := f3.Wait()
@@ -60,13 +60,13 @@ func TestJoinTimeout(t *testing.T) {
 
 func TestJoinTimeout2(t *testing.T) {
 	f1 := Go(func() (string, error) {
-		time.Sleep(100 * time.Millisecond)
 		return "foo", nil
 	})
 	f2 := Go2(func() (string, string, error) {
+		time.Sleep(100 * time.Millisecond)
 		return "foo", "bar", nil
 	})
-	f3 := f2.JoinTimeout(f1, 50*time.Millisecond).Then(func(f1Ret1, f1Ret2 string, f2Ret any) (any, error) {
+	f3 := f2.JoinTimeout(f1, 50*time.Millisecond, 0).Then(func(f1Ret1, f1Ret2 string, f2Ret any) (any, error) {
 		return T3[string, string, any]{f1Ret1, f1Ret2, f2Ret}, nil
 	})
 	_, err := f3.Wait()
