@@ -14,13 +14,34 @@ Golang Future异步模型，用于异步获取执行结果，使用Go启动一�
 ## 核心Feature
 
 - [x] 支持范型，根据任务类型返回对应类型的Future，无需类型转换
-- [x] 支持多返回值类型任务：从单返回值到至多5个返回值
+- [x] 支持多返回值类型任务：从单返回值到至多5个返回值+error
 - [x] 支持重复从future中`Wait`获取结果，并发高效、安全
 - [x] 支持`Combine`多个Future任务，等待完成并合并结果和错误，8个值之内的合并支持范型
 - [x] 支持`WhenComplete`在链路节点完成时进行错误处理/结果检查
 - [x] 支持`Then`链接其他Future任务
 - [x] 支持链式`Join`其他Future任务
 - [x] 支持设置超时时间
+
+## BenchMark
+
+```text
+func BenchmarkFuture(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		f := Go(func() (string, error) {
+			return "bar", nil
+		})
+		f.Wait()
+	}
+	b.StopTimer()
+}
+==================================================================================================
+goos: darwin
+goarch: arm64
+pkg: github.com/ycl2018/go-future/future
+cpu: Apple M3 Pro
+BenchmarkFuture-12       2929560               396.0 ns/op           152 B/op          4 allocs/op
+```
 
 ## Install
 
@@ -92,7 +113,7 @@ func main() {
 
 	// 做其他事情...
 	
-	// 在需要的地方获取结果
+	// 在需要的地方获取结果，范型实现，返回值无需转换类型可直接使用
 	v1, v2, v3, err := Combine3(f1, f2, f3)
 	log.Println(v1, v2, v3, err)
 }
@@ -155,7 +176,7 @@ func TestFuture(t *testing.T) {
 		"https://www.test.com/pic1",
 		"https://www.test.com/pic2",
 		"https://www.test.com/pic3",
-		"https://www.test.com/pic3",
+		"https://www.test.com/pic4",
 	}
 	var futures []*Future[[]byte]
 	for _, url := range urls {

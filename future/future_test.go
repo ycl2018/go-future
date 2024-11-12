@@ -210,7 +210,7 @@ func TestPanic(t *testing.T) {
 	}
 }
 
-func BenchmarkFeature(b *testing.B) {
+func BenchmarkFuture(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		f := Go(func() (string, error) {
