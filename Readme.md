@@ -22,6 +22,27 @@ Golang Future异步模型，用于异步获取执行结果，使用Go启动一�
 - [x] 支持链式`Join`其他Future任务
 - [x] 支持设置超时时间
 
+## BenchMark
+
+```text
+func BenchmarkFuture(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		f := Go(func() (string, error) {
+			return "bar", nil
+		})
+		f.Wait()
+	}
+	b.StopTimer()
+}
+==================================================================================================
+goos: darwin
+goarch: arm64
+pkg: github.com/ycl2018/go-future/future
+cpu: Apple M3 Pro
+BenchmarkFuture-12       2929560               396.0 ns/op           152 B/op          4 allocs/op
+```
+
 ## Install
 
 ```shell
