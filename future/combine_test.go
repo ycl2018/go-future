@@ -2,6 +2,7 @@ package future
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -51,7 +52,7 @@ func TestCombine(t *testing.T) {
 	}
 }
 
-func TestCombine10(t *testing.T) {
+func TestCombine8(t *testing.T) {
 	var mockErr1 = errors.New("error 1")
 	var mockErr2 = errors.New("error 2")
 	var mockErr3 = errors.New("error 3")
@@ -60,36 +61,34 @@ func TestCombine10(t *testing.T) {
 	var mockErr6 = errors.New("error 6")
 	var mockErr7 = errors.New("error 7")
 	var mockErr8 = errors.New("error 8")
-	var mockErr9 = errors.New("error 9")
-	var mockErr10 = errors.New("error 10")
 
 	var cases = []struct {
-		name                                                        string
-		v1, v2, v3, v4, v5, v6, v7, v8, v9, v10                     string
-		err1, err2, err3, err4, err5, err6, err7, err8, err9, err10 error
-		wantError                                                   error
+		name                                           string
+		v1, v2, v3, v4, v5, v6, v7, v8                 string
+		err1, err2, err3, err4, err5, err6, err7, err8 error
+		wantError                                      error
 	}{
 		{
-			"no error", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-			nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+			"no error",
+			"1", "2", "3", "4", "5", "6", "7", "8",
+			nil, nil, nil, nil, nil, nil, nil, nil,
 			nil,
 		},
 		{
-			"no error", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-			mockErr1, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+			"no error", "1", "2", "3", "4", "5", "6", "7", "8",
+			mockErr1, nil, nil, nil, nil, nil, nil, nil,
 			errors.Join(mockErr1),
 		},
 		{
-			"no error", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+			"no error", "1", "2", "3", "4", "5", "6", "7", "8",
 			mockErr1, mockErr2, mockErr3, mockErr4, mockErr5, mockErr6, mockErr7,
-			mockErr8, mockErr9, mockErr10,
-			errors.Join(mockErr1, mockErr2, mockErr3, mockErr4, mockErr5, mockErr6, mockErr7, mockErr8,
-				mockErr9, mockErr10),
+			mockErr8,
+			errors.Join(mockErr1, mockErr2, mockErr3, mockErr4, mockErr5, mockErr6, mockErr7, mockErr8),
 		},
 	}
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
-			v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, err := Combine10(
+			v1, v2, v3, v4, v5, v6, v7, v8, err := Combine8(
 				Go(func() (value string, err error) {
 					return s.v1, s.err1
 				}),
@@ -113,12 +112,6 @@ func TestCombine10(t *testing.T) {
 				}),
 				Go(func() (value string, err error) {
 					return s.v8, s.err8
-				}),
-				Go(func() (value string, err error) {
-					return s.v9, s.err9
-				}),
-				Go(func() (value string, err error) {
-					return s.v10, s.err10
 				}),
 			)
 			if v1 != s.v1 {
@@ -144,12 +137,6 @@ func TestCombine10(t *testing.T) {
 			}
 			if v8 != s.v8 {
 				t.Fatalf("want v8:%s but get:%s", s.v8, v8)
-			}
-			if v9 != s.v9 {
-				t.Fatalf("want v9:%s but get:%s", s.v9, v9)
-			}
-			if v10 != s.v10 {
-				t.Fatalf("want v10:%s but get:%s", s.v10, v10)
 			}
 			if s.wantError != nil && s.wantError.Error() != err.Error() {
 				t.Fatalf("want err:%v but get:%v", s.wantError, err)
@@ -204,7 +191,7 @@ func TestCombineAll(t *testing.T) {
 	}
 }
 
-func TestWaitOneOf(t *testing.T) {
+func TestCombineAny(t *testing.T) {
 	f1 := Go(func() (value string, err error) {
 		time.Sleep(20 * time.Millisecond)
 		return "1", nil
@@ -226,7 +213,7 @@ func TestWaitOneOf(t *testing.T) {
 	}
 }
 
-func TestWaitOneOfTimeout(t *testing.T) {
+func TestCombineAnyTimeout(t *testing.T) {
 	f1 := Go(func() (value string, err error) {
 		time.Sleep(20 * time.Millisecond)
 		return "1", nil
@@ -248,7 +235,7 @@ func TestWaitOneOfTimeout(t *testing.T) {
 	}
 }
 
-func TestCominAllTimeout(t *testing.T) {
+func TestCombineAllTimeout(t *testing.T) {
 	f1 := Go(func() (value string, err error) {
 		time.Sleep(20 * time.Millisecond)
 		return "1", nil
@@ -265,4 +252,84 @@ func TestCominAllTimeout(t *testing.T) {
 	if !errors.Is(err, ErrTimeout) {
 		t.Fatalf("expect timeout err, but got:%v", err)
 	}
+}
+
+func TestCombine1x2(t *testing.T) {
+	type args[T any, V any, M any] struct {
+		f1 *Future[T]
+		f2 *Future2[V, M]
+	}
+	type testCase[T any, V any, M any] struct {
+		name    string
+		args    args[T, V, M]
+		want    T
+		want1   V
+		want2   M
+		wantErr bool
+	}
+	var ret = "bar"
+	tests := []testCase[string, *string, int]{
+		{
+			name: "case 1",
+			args: args[string, *string, int]{
+				f1: Go(func() (string, error) {
+					return "foo", nil
+				}),
+				f2: Go2(func() (*string, int, error) {
+					return &ret, 1, nil
+				}),
+			},
+			want:    "foo",
+			want1:   &ret,
+			want2:   1,
+			wantErr: false,
+		},
+		{
+			name: "case 2",
+			args: args[string, *string, int]{
+				f1: Go(func() (string, error) {
+					return "", errors.New("ops")
+				}),
+				f2: Go2(func() (*string, int, error) {
+					return nil, 0, errors.New("bar")
+				}),
+			},
+			want:    "",
+			want1:   nil,
+			want2:   0,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, got2, err := Combine1u2(tt.args.f1, tt.args.f2)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Combine1x2() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Combine1x2() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("Combine1x2() got1 = %v, want %v", got1, tt.want1)
+			}
+			if !reflect.DeepEqual(got2, tt.want2) {
+				t.Errorf("Combine1x2() got2 = %v, want %v", got2, tt.want2)
+			}
+		})
+	}
+}
+
+func TestCombine2x2u3(t *testing.T) {
+	f1 := Go2(func() (string, string, error) {
+		return "foo", "bar", nil
+	})
+	f2 := Go2(func() (string, int, error) {
+		return "foo2", 1, nil
+	})
+	f3 := Go3(func() (string, string, int, error) {
+		return "foo3", "bar3", 2, nil
+	})
+	v1, v2, v3, v4, v5, v6, v7, err := Combine2x2u3(f1, f2, f3)
+	t.Log(v1, v2, v3, v4, v5, v6, v7, err)
 }

@@ -15,8 +15,8 @@ Golang Future异步模型，用于异步获取执行结果，使用Go启动一�
 
 - [x] 支持范型，根据任务类型返回对应类型的Future，无需类型转换
 - [x] 支持多返回值类型任务：从单返回值到至多5个返回值
-- [x] 支持重复从future中`Wait`获取结果，并发安全
-- [x] 支持`Combine`多个Future任务，等待完成并合并结果和错误
+- [x] 支持重复从future中`Wait`获取结果，并发高效、安全
+- [x] 支持`Combine`多个Future任务，等待完成并合并结果和错误，8个值之内的合并支持范型
 - [x] 支持`WhenComplete`在链路节点完成时进行错误处理/结果检查
 - [x] 支持`Then`链接其他Future任务
 - [x] 支持链式`Join`其他Future任务
@@ -28,7 +28,7 @@ Golang Future异步模型，用于异步获取执行结果，使用Go启动一�
 go get github.com/ycl2018/go-future
 ```
 
-## Example
+## Examples
 
 ### Example1: 创建一个Future并等待执行结果
 
@@ -98,7 +98,7 @@ func main() {
 }
 ```
 
-## Example3: 使用Then链式处理任务
+### Example3: 使用Then链式处理任务
 
 创建Future任务后，可以使用`Then`链接后置处理任务，可以链接多个，它会返回一个新的Future任务，在需要的地方使用`Wait`获取整个链式任务的处理结果。
 
@@ -145,7 +145,7 @@ func TestThen(t *testing.T) {
 }
 ```
 
-## Example4: 综合场景：通过URL下载图片
+### Example4: 综合场景：通过URL下载图片
 
 这个示例说明了使用go-future方便地批量下载url二进制图片信息的方式
 

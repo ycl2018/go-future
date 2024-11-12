@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+type ErrPanic struct {
+	e     any
+	stack []byte
+}
+
+func (e *ErrPanic) Error() string {
+	return fmt.Sprintf("[Future] recover:%v. Stack:%s", e.e, e.stack)
+}
+
 // Future wrap value which can be Wait to get.
 type Future[T any] struct {
 	val  T
@@ -49,7 +58,7 @@ func runFuture[T any](f *Future[T], w worker[T]) {
 	var val T
 	defer func() {
 		if e := recover(); e != nil {
-			err = fmt.Errorf("[Future] recover:%v. Stack:%s", e, debug.Stack())
+			err = &ErrPanic{e: e, stack: debug.Stack()}
 		}
 		f.cond.L.Lock()
 		f.val = val
