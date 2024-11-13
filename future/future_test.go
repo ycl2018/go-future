@@ -209,14 +209,3 @@ func TestPanic(t *testing.T) {
 		t.Fatalf("expect panic err, but got nil")
 	}
 }
-
-func BenchmarkFuture(b *testing.B) {
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		f := Go(func() (string, error) {
-			return "bar", nil
-		})
-		f.Wait()
-	}
-	b.StopTimer()
-}
