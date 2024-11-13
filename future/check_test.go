@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestWhenComplete(t *testing.T) {
+func TestCheck(t *testing.T) {
 	ret, err := Go(func() (string, error) {
 		return "foo", nil
-	}).WhenComplete(func(ret string, err error) (string, error) {
+	}).Check(func(ret string, err error) (string, error) {
 		if ret == "foo" {
 			return "bar", nil
 		}
@@ -22,10 +22,10 @@ func TestWhenComplete(t *testing.T) {
 	}
 }
 
-func TestWhenComplete2(t *testing.T) {
+func TestCheck2(t *testing.T) {
 	ret, ret2, err := Go2(func() (string, string, error) {
 		return "foo", "foo", nil
-	}).WhenComplete(func(ret string, ret2 string, err error) (string, string, error) {
+	}).Check(func(ret string, ret2 string, err error) (string, string, error) {
 		if ret == "foo" {
 			return "bar", "bar", nil
 		}
