@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestCombine(t *testing.T) {
+func TestCollect(t *testing.T) {
 	var mockErr1 = errors.New("error 1")
 	var mockErr2 = errors.New("error 2")
 
@@ -32,7 +32,7 @@ func TestCombine(t *testing.T) {
 	}
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
-			v1, v2, err := Combine(
+			v1, v2, err := Collect(
 				Go(func() (value string, err error) {
 					return s.v1, s.err1
 				}),
@@ -52,7 +52,7 @@ func TestCombine(t *testing.T) {
 	}
 }
 
-func TestCombine8(t *testing.T) {
+func TestCollect8(t *testing.T) {
 	var mockErr1 = errors.New("error 1")
 	var mockErr2 = errors.New("error 2")
 	var mockErr3 = errors.New("error 3")
@@ -88,7 +88,7 @@ func TestCombine8(t *testing.T) {
 	}
 	for _, s := range cases {
 		t.Run(s.name, func(t *testing.T) {
-			v1, v2, v3, v4, v5, v6, v7, v8, err := Combine8(
+			v1, v2, v3, v4, v5, v6, v7, v8, err := Collect8(
 				Go(func() (value string, err error) {
 					return s.v1, s.err1
 				}),
@@ -145,8 +145,8 @@ func TestCombine8(t *testing.T) {
 	}
 }
 
-func TestCombineN(t *testing.T) {
-	vv, err := CombineSame(
+func TestCollectN(t *testing.T) {
+	vv, err := CollectSlice(
 		Go(func() (value string, err error) {
 			return "v1", nil
 		}),
@@ -168,8 +168,8 @@ func TestCombineN(t *testing.T) {
 	}
 }
 
-func TestCombineAll(t *testing.T) {
-	all, err := CombineAll(
+func TestCollectAll(t *testing.T) {
+	all, err := CollectAll(
 		Go(func() (value string, err error) {
 			return "v1", nil
 		}),
@@ -191,7 +191,7 @@ func TestCombineAll(t *testing.T) {
 	}
 }
 
-func TestCombineAny(t *testing.T) {
+func TestCollectAny(t *testing.T) {
 	f1 := Go(func() (value string, err error) {
 		time.Sleep(20 * time.Millisecond)
 		return "1", nil
@@ -204,7 +204,7 @@ func TestCombineAny(t *testing.T) {
 		time.Sleep(60 * time.Millisecond)
 		return "3", nil
 	})
-	ret, err := CombineAny(f1, f2, f3)
+	ret, err := CollectAny(f1, f2, f3)
 	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
@@ -213,7 +213,7 @@ func TestCombineAny(t *testing.T) {
 	}
 }
 
-func TestCombineAnyTimeout(t *testing.T) {
+func TestCollectAnyTimeout(t *testing.T) {
 	f1 := Go(func() (value string, err error) {
 		time.Sleep(20 * time.Millisecond)
 		return "1", nil
@@ -226,7 +226,7 @@ func TestCombineAnyTimeout(t *testing.T) {
 		time.Sleep(60 * time.Millisecond)
 		return "3", nil
 	})
-	ret, err := CombineAnyTimeout(5*time.Millisecond, f1, f2, f3)
+	ret, err := CollectAnyTimeout(5*time.Millisecond, f1, f2, f3)
 	if ret != "" {
 		t.Fatalf("want empty string, but got:%s", ret)
 	}
@@ -235,7 +235,7 @@ func TestCombineAnyTimeout(t *testing.T) {
 	}
 }
 
-func TestCombineAllTimeout(t *testing.T) {
+func TestCollectAllTimeout(t *testing.T) {
 	f1 := Go(func() (value string, err error) {
 		time.Sleep(20 * time.Millisecond)
 		return "1", nil
@@ -248,13 +248,13 @@ func TestCombineAllTimeout(t *testing.T) {
 		time.Sleep(60 * time.Millisecond)
 		return "3", nil
 	})
-	_, err := CombineAllTimeout(5*time.Millisecond, f1, f2, f3)
+	_, err := CollectAllTimeout(5*time.Millisecond, f1, f2, f3)
 	if !errors.Is(err, ErrTimeout) {
 		t.Fatalf("expect timeout err, but got:%v", err)
 	}
 }
 
-func TestCombine1x2(t *testing.T) {
+func TestCollect1x2(t *testing.T) {
 	type args[T any, V any, M any] struct {
 		f1 *Future[T]
 		f2 *Future2[V, M]
@@ -302,25 +302,25 @@ func TestCombine1x2(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, got2, err := Combine1u2(tt.args.f1, tt.args.f2)
+			got, got1, got2, err := Collect1u2(tt.args.f1, tt.args.f2)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Combine1x2() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Collect1x2() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Combine1x2() got = %v, want %v", got, tt.want)
+				t.Errorf("Collect1x2() got = %v, want %v", got, tt.want)
 			}
 			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("Combine1x2() got1 = %v, want %v", got1, tt.want1)
+				t.Errorf("Collect1x2() got1 = %v, want %v", got1, tt.want1)
 			}
 			if !reflect.DeepEqual(got2, tt.want2) {
-				t.Errorf("Combine1x2() got2 = %v, want %v", got2, tt.want2)
+				t.Errorf("Collect1x2() got2 = %v, want %v", got2, tt.want2)
 			}
 		})
 	}
 }
 
-func TestCombine2x2u3(t *testing.T) {
+func TestCollect2x2u3(t *testing.T) {
 	f1 := Go2(func() (string, string, error) {
 		return "foo", "bar", nil
 	})
@@ -330,6 +330,6 @@ func TestCombine2x2u3(t *testing.T) {
 	f3 := Go3(func() (string, string, int, error) {
 		return "foo3", "bar3", 2, nil
 	})
-	v1, v2, v3, v4, v5, v6, v7, err := Combine2x2u3(f1, f2, f3)
+	v1, v2, v3, v4, v5, v6, v7, err := Collect2x2u3(f1, f2, f3)
 	t.Log(v1, v2, v3, v4, v5, v6, v7, err)
 }
