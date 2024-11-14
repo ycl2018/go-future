@@ -2,6 +2,7 @@ package future
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -124,5 +125,23 @@ func TestJoinErr(t *testing.T) {
 	}
 	if !errors.Is(err, mockErr1) || !errors.Is(err, mockErr2) {
 		t.Fatalf("want err:%v,but got:%v", errors.Join(mockErr1, mockErr2), err)
+	}
+}
+
+func TestJoinThen(t *testing.T) {
+	f1 := Go(func() (string, error) {
+		return "foo", nil
+	})
+	f2 := Go2(func() (string, int, error) {
+		return "bar", 1, nil
+	}).JoinThen(f1, func(bar string, val int, f1Value any) (any, error) {
+		return fmt.Sprintf("%s%s%d", f1Value.(string), bar, val), nil
+	})
+	ret, err := f2.Wait()
+	if err != nil {
+		t.Fatalf("want nil,but got %v", err)
+	}
+	if ret != "foobar1" {
+		t.Fatalf("want :%s,but got:%s", "foobar1", ret)
 	}
 }

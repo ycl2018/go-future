@@ -63,3 +63,78 @@ func (f *Future5[T, V, M, N, O]) Join(other futureI) *Future[[6]any] {
 		return [...]any{val1, val2, val3, val4, val5, unwrap(val6)}, errors.Join(err1, err2)
 	})
 }
+
+// JoinThen join other Future task, then invoke the 'then' func and return a new Future.
+func (f *Future[T]) JoinThen(other futureI, then func(T, any) (any, error)) *Future[any] {
+	return Go(func() (any, error) {
+		val1, err1 := f.Wait()
+		if err1 != nil {
+			return nil, err1
+		}
+		val2, err2 := other.waitUnify()
+		if err2 != nil {
+			return nil, err2
+		}
+		return then(val1, unwrap(val2))
+	})
+}
+
+// JoinThen join other Future task, then invoke the 'then' func and return a new Future.
+func (f *Future2[T, V]) JoinThen(other futureI, then func(T, V, any) (any, error)) *Future[any] {
+	return Go(func() (any, error) {
+		val1, val2, err1 := f.Wait()
+		if err1 != nil {
+			return nil, err1
+		}
+		val3, err2 := other.waitUnify()
+		if err2 != nil {
+			return nil, err2
+		}
+		return then(val1, val2, unwrap(val3))
+	})
+}
+
+// JoinThen join other Future task, then invoke the 'then' func and return a new Future.
+func (f *Future3[T, V, M]) JoinThen(other futureI, then func(T, V, M, any) (any, error)) *Future[any] {
+	return Go(func() (any, error) {
+		val1, val2, val3, err1 := f.Wait()
+		if err1 != nil {
+			return nil, err1
+		}
+		val4, err2 := other.waitUnify()
+		if err2 != nil {
+			return nil, err2
+		}
+		return then(val1, val2, val3, unwrap(val4))
+	})
+}
+
+// JoinThen join other Future task, then invoke the 'then' func and return a new Future.
+func (f *Future4[T, V, M, N]) JoinThen(other futureI, then func(T, V, M, N, any) (any, error)) *Future[any] {
+	return Go(func() (any, error) {
+		val1, val2, val3, val4, err1 := f.Wait()
+		if err1 != nil {
+			return nil, err1
+		}
+		val5, err2 := other.waitUnify()
+		if err2 != nil {
+			return nil, err2
+		}
+		return then(val1, val2, val3, val4, unwrap(val5))
+	})
+}
+
+// JoinThen join other Future task, then invoke the 'then' func and return a new Future.
+func (f *Future5[T, V, M, N, O]) JoinThen(other futureI, then func(T, V, M, N, O, any) (any, error)) *Future[any] {
+	return Go(func() (any, error) {
+		val1, val2, val3, val4, val5, err1 := f.Wait()
+		if err1 != nil {
+			return nil, err1
+		}
+		val6, err2 := other.waitUnify()
+		if err2 != nil {
+			return nil, err2
+		}
+		return then(val1, val2, val3, val4, val5, unwrap(val6))
+	})
+}
