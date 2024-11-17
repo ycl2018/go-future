@@ -21,34 +21,32 @@ func Collect[T, V any](f1 *Future[T], f2 *Future[V]) (T, V, error) {
 
 // Collect3 futures, wait and return joined values and errors.
 func Collect3[T, V, M any](f1 *Future[T], f2 *Future[V], f3 *Future[M]) (T, V, M, error) {
-	v1, v2, cErr := Collect(f1, f2)
-	v3, err := f3.Wait()
-	err = errors.Join(cErr, err)
-	return v1, v2, v3, err
+	v1, v2, err1 := Collect(f1, f2)
+	v3, err2 := f3.Wait()
+	return v1, v2, v3, errors.Join(err1, err2)
 }
 
 // Collect1u2 combine Future with Future2, wait and return joined values and errors.
 func Collect1u2[T, V, M any](f1 *Future[T], f2 *Future2[V, M]) (T, V, M, error) {
-	v1, err := f1.Wait()
-	v2, v3, err := f2.Wait()
-	return v1, v2, v3, err
+	v1, err1 := f1.Wait()
+	v2, v3, err2 := f2.Wait()
+	return v1, v2, v3, errors.Join(err1, err2)
 }
 
 // -------------------- Collect 4 Values --------------------
 
 // Collect4 futures, wait and return joined values and errors.
 func Collect4[T, V, M, N any](f1 *Future[T], f2 *Future[V], f3 *Future[M], f4 *Future[N]) (T, V, M, N, error) {
-	v1, v2, v3, cErr := Collect3(f1, f2, f3)
-	v4, err := f4.Wait()
-	err = errors.Join(cErr, err)
-	return v1, v2, v3, v4, err
+	v1, v2, v3, err1 := Collect3(f1, f2, f3)
+	v4, err2 := f4.Wait()
+	return v1, v2, v3, v4, errors.Join(err1, err2)
 }
 
 // Collect1u3 combine Future with Future3, wait and return joined values and errors.
 func Collect1u3[T, V, M, N any](f1 *Future[T], f2 *Future3[V, M, N]) (T, V, M, N, error) {
-	v1, err := f1.Wait()
-	v2, v3, v4, err := f2.Wait()
-	return v1, v2, v3, v4, err
+	v1, err1 := f1.Wait()
+	v2, v3, v4, err2 := f2.Wait()
+	return v1, v2, v3, v4, errors.Join(err1, err2)
 }
 
 // Collect2x1u2 combine 2 Futures with Future2, wait and return joined values and errors.
@@ -70,10 +68,9 @@ func Collect2x2[T, V, M, N any](f1 *Future2[T, V], f2 *Future2[M, N]) (T, V, M, 
 // Collect5 futures, wait and return joined values and errors.
 func Collect5[T, V, M, N, O any](f1 *Future[T], f2 *Future[V], f3 *Future[M], f4 *Future[N], f5 *Future[O]) (
 	T, V, M, N, O, error) {
-	v1, v2, v3, v4, cErr := Collect4(f1, f2, f3, f4)
-	v5, err := f5.Wait()
-	err = errors.Join(cErr, err)
-	return v1, v2, v3, v4, v5, err
+	v1, v2, v3, v4, err1 := Collect4(f1, f2, f3, f4)
+	v5, err2 := f5.Wait()
+	return v1, v2, v3, v4, v5, errors.Join(err1, err2)
 }
 
 // Collect1u4 combine Future with Future4, wait and return joined values and errors.
@@ -116,10 +113,9 @@ func Collect2u3[T, V, M, N, O any](f1 *Future2[T, V], f2 *Future3[M, N, O]) (T, 
 // Collect6 futures, wait and return joined values and errors.
 func Collect6[T, V, M, N, O, P any](f1 *Future[T], f2 *Future[V], f3 *Future[M], f4 *Future[N], f5 *Future[O],
 	f6 *Future[P]) (T, V, M, N, O, P, error) {
-	v1, v2, v3, v4, v5, cErr := Collect5(f1, f2, f3, f4, f5)
-	v6, err := f6.Wait()
-	err = errors.Join(cErr, err)
-	return v1, v2, v3, v4, v5, v6, err
+	v1, v2, v3, v4, v5, err1 := Collect5(f1, f2, f3, f4, f5)
+	v6, err2 := f6.Wait()
+	return v1, v2, v3, v4, v5, v6, errors.Join(err1, err2)
 }
 
 // Collect1u5 combine Future with Future5, wait and return joined values and errors.
@@ -190,10 +186,9 @@ func Collect2x3[T, V, M, N, O, P any](f1 *Future3[T, V, M], f2 *Future3[N, O, P]
 // Collect7 Future(s), wait and return joined values and errors.
 func Collect7[T, V, M, N, O, P, Q any](f1 *Future[T], f2 *Future[V], f3 *Future[M], f4 *Future[N], f5 *Future[O],
 	f6 *Future[P], f7 *Future[Q]) (T, V, M, N, O, P, Q, error) {
-	v1, v2, v3, v4, v5, v6, cErr := Collect6(f1, f2, f3, f4, f5, f6)
-	v7, err := f7.Wait()
-	err = errors.Join(cErr, err)
-	return v1, v2, v3, v4, v5, v6, v7, err
+	v1, v2, v3, v4, v5, v6, err1 := Collect6(f1, f2, f3, f4, f5, f6)
+	v7, err2 := f7.Wait()
+	return v1, v2, v3, v4, v5, v6, v7, errors.Join(err1, err2)
 }
 
 // Collect1u2u4 combine Future, Future2 with Future4, wait and return joined values and errors.
