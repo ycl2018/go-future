@@ -145,49 +145,105 @@ func TestCollect8(t *testing.T) {
 	}
 }
 
-func TestCollectN(t *testing.T) {
-	vv, err := CollectSlice(
-		Go(func() (value string, err error) {
-			return "v1", nil
-		}),
-		Go(func() (value string, err error) {
-			return "v2", nil
-		}),
-		Go(func() (value string, err error) {
-			return "v3", nil
-		}),
-	)
-	if err != nil {
-		t.Fatalf("get err:%v", err)
+func TestCollectSlice(t *testing.T) {
+	var err1 = errors.New("ops 1")
+	var err2 = errors.New("ops 2")
+	var tests = []struct {
+		caseName string
+		errs     []error
+		outputs  []string
+	}{
+		{
+			caseName: "0 err",
+			errs:     []error{nil, nil, nil},
+			outputs:  []string{"1", "2", "3"},
+		},
+		{
+			caseName: "1 err",
+			errs:     []error{nil, err1, nil},
+			outputs:  []string{"1", "2", "3"},
+		},
+		{
+			caseName: "2 err",
+			errs:     []error{nil, err1, err2},
+			outputs:  []string{"1", "2", "3"},
+		},
 	}
-	var want = []string{"v1", "v2", "v3"}
-	for i, s := range vv {
-		if want[i] != s {
-			t.Fatalf("num:%d want:%s but get:%s", i, want[i], s)
-		}
+
+	for _, test := range tests {
+		t.Run(test.caseName, func(t *testing.T) {
+			var ff []*Future[string]
+			for i, output := range test.outputs {
+				i, output := i, output
+				ff = append(ff, Go(func() (string, error) {
+					return output, test.errs[i]
+				}))
+			}
+			ss, err := CollectSlice(ff...)
+			for _, e := range test.errs {
+				if e != nil {
+					if !errors.Is(err, e) {
+						t.Fatalf("want errs:%v,but got err:%v", e, err)
+					}
+				}
+			}
+			for i, want := range test.outputs {
+				if ss[i] != want {
+					t.Fatalf("want ss[%d]:%s but got:%s", i, want, ss[i])
+				}
+			}
+		})
 	}
 }
 
 func TestCollectAll(t *testing.T) {
-	all, err := CollectAll(
-		Go(func() (value string, err error) {
-			return "v1", nil
-		}),
-		Go2(func() (value int, value2 string, err error) {
-			return 2, "2", nil
-		}),
-		Go(func() (value bool, err error) {
-			return true, nil
-		}),
-	)
-	if err != nil {
-		t.Fatalf("get err:%v", err)
+	var err1 = errors.New("ops 1")
+	var err2 = errors.New("ops 2")
+	var tests = []struct {
+		caseName string
+		errs     []error
+		outputs  []string
+	}{
+		{
+			caseName: "0 err",
+			errs:     []error{nil, nil, nil},
+			outputs:  []string{"1", "2", "3"},
+		},
+		{
+			caseName: "1 err",
+			errs:     []error{nil, err1, nil},
+			outputs:  []string{"1", "2", "3"},
+		},
+		{
+			caseName: "2 err",
+			errs:     []error{nil, err1, err2},
+			outputs:  []string{"1", "2", "3"},
+		},
 	}
-	var want = []any{"v1", 2, "2", true}
-	for i, s := range all {
-		if want[i] != s {
-			t.Fatalf("num:%d want:%s but get:%s", i, want[i], s)
-		}
+
+	for _, test := range tests {
+		t.Run(test.caseName, func(t *testing.T) {
+			var ff []futureI
+			for i, output := range test.outputs {
+				i, output := i, output
+				ff = append(ff, Go(func() (string, error) {
+					return output, test.errs[i]
+				}))
+			}
+			ss, err := CollectAll(ff...)
+			for _, e := range test.errs {
+				if e != nil {
+					if !errors.Is(err, e) {
+						t.Fatalf("want errs:%v,but got err:%v", e, err)
+					}
+				}
+			}
+			for i, want := range test.outputs {
+				if ss[i] != want {
+					t.Fatalf("want ss[%d]:%s but got:%s", i, want, ss[i])
+				}
+			}
+		})
 	}
 }
 

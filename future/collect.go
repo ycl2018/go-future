@@ -389,7 +389,7 @@ func CollectSlice[T any](fs ...*Future[T]) ([]T, error) {
 	var ret []T
 	for _, f := range fs {
 		v, curErr := f.Wait()
-		err = errors.Join(curErr)
+		err = errors.Join(err, curErr)
 		ret = append(ret, v)
 	}
 	return ret, err
@@ -414,7 +414,7 @@ func CollectAll(fs ...futureI) ([]any, error) {
 	var ret []any
 	for _, f := range fs {
 		v, curErr := f.waitUnify()
-		err = errors.Join(curErr)
+		err = errors.Join(err, curErr)
 		ret = append(ret, v...)
 	}
 	return ret, err
