@@ -1,6 +1,7 @@
 # Go Future
 
 ![Build Status](https://github.com/ycl2018/go-future/actions/workflows/test.yml/badge.svg?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ycl2018/go-future)](https://goreportcard.com/report/github.com/ycl2018/go-future)
 
 Golang Future异步模型，用于异步获取执行结果，使用Go启动一个goroutine，它会返回一个Future来包装结果，在需要获取结果的地方通过Wait来获取结果。
 
@@ -22,6 +23,7 @@ Golang Future异步模型，用于异步获取执行结果，使用Go启动一�
 - [x] 支持`Check`在链路节点完成时进行错误处理/结果检查
 - [x] 支持链式`Join`其他Future任务
 - [x] 支持设置超时时间
+- [x] 支持使用 `Group` `AnyGroup` `ErrGroup` 等类WaitGroup用法
 
 ## BenchMark
 
@@ -179,10 +181,11 @@ func TestFuture(t *testing.T) {
 		"https://www.test.com/pic3",
 		"https://www.test.com/pic4",
 	}
-	var futures []*Future[[]byte]
+	// 声明`[]byte`类型Group
+	var g Group[[]byte]
 	for _, url := range urls {
 		// 启动下载任务
-		f := Go(func() ([]byte, error) {
+		g.Run(func() ([]byte, error) {
 			resp, err := http.DefaultClient.Get(url)
 			if err != nil {
 				return nil, err
@@ -193,11 +196,9 @@ func TestFuture(t *testing.T) {
 			}
 			return bytes, nil
 		})
-		// 收集Futures
-		futures = append(futures, f)
 	}
 	// 收集Futures获取结果
-	ret, err := CollectSlice(futures...)
+	ret, err := g.Wait()
 	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
