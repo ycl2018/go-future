@@ -22,6 +22,14 @@ func (g *Group[T]) Run(w worker[T]) {
 	g.ff = append(g.ff, Go(w))
 }
 
+// Add a Future to group
+func (g *Group[T]) Add(f *Future[T]) {
+	if g.sealed.Load() {
+		panic("group is sealed")
+	}
+	g.ff = append(g.ff, f)
+}
+
 // Wait all the Futures return
 func (g *Group[T]) Wait() ([]T, error) {
 	g.sealed.Store(true)
@@ -43,6 +51,14 @@ type ErrGroup struct {
 func (e *ErrGroup) Run(w func() error) {
 	e.g.Run(func() (struct{}, error) {
 		err := w()
+		return struct{}{}, err
+	})
+}
+
+// Add a Future to group
+func (e *ErrGroup) Add(f futureI) {
+	e.g.Run(func() (struct{}, error) {
+		_, err := f.waitUnify()
 		return struct{}{}, err
 	})
 }
