@@ -127,8 +127,11 @@ func Timeout[T any](timeout time.Duration, f func() (T, error)) (T, error) {
 		getRet <- T2[T, error]{ret, err}
 	}()
 
+	timer := time.NewTimer(timeout)
+	defer timer.Stop()
+	
 	select {
-	case <-time.NewTimer(timeout).C:
+	case <-timer.C:
 		var t T
 		return t, ErrTimeout
 	case ret := <-getRet:
