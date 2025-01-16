@@ -121,7 +121,7 @@ func Timeout[T any](timeout time.Duration, f func() (T, error)) (T, error) {
 	if timeout <= 0 {
 		return f()
 	}
-	var getRet = make(chan T2[T, error])
+	var getRet = make(chan T2[T, error], 1)
 	go func() {
 		ret, err := f()
 		getRet <- T2[T, error]{ret, err}
