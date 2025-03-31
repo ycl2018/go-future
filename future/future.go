@@ -3,7 +3,7 @@ package future
 import (
 	"fmt"
 	"runtime/debug"
-	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -18,10 +18,12 @@ func (e *ErrPanic) Error() string {
 
 // Future wrap value which can be Wait to get.
 type Future[T any] struct {
-	val  T
-	flag bool
-	cond *sync.Cond
-	e    error
+	noCopy noCopy
+
+	state atomic.Uint64 // high 32 bits are counter, low 32 bits are waiter count.
+	sema  uint32
+	val   T
+	e     error
 }
 
 func (f *Future[T]) waitUnify() ([]any, error) {
@@ -36,19 +38,26 @@ func (f *Future[T]) waitTimeout(timeout time.Duration) ([]any, error) {
 
 // Wait and return the value when it is ready,or else blocked
 func (f *Future[T]) Wait() (T, error) {
-	f.cond.L.Lock()
-	if !f.flag {
-		f.cond.Wait()
+	for {
+		state := f.state.Load()
+		v := int32(state >> 32)
+		if v == 0 {
+			return f.val, f.e
+		}
+		// Increment waiters count.
+		if f.state.CompareAndSwap(state, state+1) {
+			runtime_Semacquire(&f.sema)
+			return f.val, f.e
+		}
 	}
-	f.cond.L.Unlock()
-	return f.val, f.e
 }
 
 type worker[T any] func() (T, error)
 
 // Go run function in a new goroutine. result value wrapped in Future
 func Go[T any](w worker[T]) *Future[T] {
-	var f = &Future[T]{cond: sync.NewCond(&sync.Mutex{})}
+	var f = &Future[T]{}
+	f.state.Store(uint64(1) << 32)
 	go runFuture(f, w)
 	return f
 }
@@ -60,12 +69,17 @@ func runFuture[T any](f *Future[T], w worker[T]) {
 		if e := recover(); e != nil {
 			err = &ErrPanic{e: e, stack: debug.Stack()}
 		}
-		f.cond.L.Lock()
 		f.val = val
 		f.e = err
-		f.flag = true
-		f.cond.L.Unlock()
-		f.cond.Broadcast()
+		var v int = -1
+		state := f.state.Add(uint64(v) << 32)
+		w := uint32(state)
+		if w == 0 {
+			return
+		}
+		for ; w != 0; w-- {
+			runtime_Semrelease(&f.sema, false, 0)
+		}
 	}()
 	val, err = w()
 }
