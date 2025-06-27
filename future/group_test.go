@@ -2,7 +2,9 @@ package future
 
 import (
 	"errors"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func TestGroup(t *testing.T) {
@@ -198,4 +200,18 @@ func TestErrGroup(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewLimitGroup(t *testing.T) {
+	g := NewLimitGroup[string](1)
+	for i := 0; i < 10; i++ {
+		i := i
+		g.Run(func() (string, error) {
+			t.Logf("start worker:%d at %d", i, time.Now().UnixMilli())
+			time.Sleep(1 * time.Millisecond)
+			t.Logf("end worker:%d at %d", i, time.Now().UnixMilli())
+			return strconv.Itoa(i), nil
+		})
+	}
+	g.Wait()
 }

@@ -12,6 +12,15 @@ type AnyGroup = Group[any]
 type Group[T any] struct {
 	ff     []*Future[T]
 	sealed atomic.Bool
+	limit  chan struct{}
+}
+
+// NewLimitGroup create a Group with limit parallelism
+func NewLimitGroup[T any](parallel int) *Group[T] {
+	if parallel <= 0 {
+		panic("limit must be greater than 0")
+	}
+	return &Group[T]{limit: make(chan struct{}, parallel)}
 }
 
 // Run a worker
@@ -19,7 +28,18 @@ func (g *Group[T]) Run(w worker[T]) {
 	if g.sealed.Load() {
 		panic("group is sealed")
 	}
-	g.ff = append(g.ff, Go(w))
+	var f *Future[T]
+	if cap(g.limit) > 0 {
+		g.limit <- struct{}{}
+		f = Go(w)
+		f.Check(func(t T, err error) (T, error) {
+			<-g.limit
+			return t, err
+		})
+	} else {
+		f = Go(w)
+	}
+	g.ff = append(g.ff, f)
 }
 
 // Add a Future to group
