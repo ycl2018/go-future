@@ -1,15 +1,9 @@
 package future
 
-import "errors"
-
-var ErrNotRun = errors.New("[Future] err:not run")
-
 // GoIf run worker in a new goroutine when can() reports true.
 func GoIf[T any](cond bool, w worker[T]) *Future[T] {
 	if !cond {
-		return &Future[T]{
-			e: ErrNotRun,
-		}
+		return &Future[T]{}
 	}
 	return Go(w)
 }
@@ -19,7 +13,6 @@ func Go2If[T, V any](cond bool, w func() (T, V, error)) *Future2[T, V] {
 	if !cond {
 		return &Future2[T, V]{
 			f: &Future[any]{
-				e:   ErrNotRun,
 				val: T2[T, V]{},
 			},
 		}
@@ -32,7 +25,6 @@ func Go3If[T, V, M any](cond bool, w func() (T, V, M, error)) *Future3[T, V, M] 
 	if !cond {
 		return &Future3[T, V, M]{
 			f: &Future[any]{
-				e:   ErrNotRun,
 				val: T3[T, V, M]{},
 			},
 		}
@@ -45,7 +37,6 @@ func Go4If[T, V, M, N any](cond bool, w func() (T, V, M, N, error)) *Future4[T, 
 	if !cond {
 		return &Future4[T, V, M, N]{
 			f: &Future[any]{
-				e:   ErrNotRun,
 				val: T4[T, V, M, N]{},
 			},
 		}
@@ -58,7 +49,6 @@ func Go5If[T, V, M, N, O any](cond bool, w func() (T, V, M, N, O, error)) *Futur
 	if !cond {
 		return &Future5[T, V, M, N, O]{
 			f: &Future[any]{
-				e:   ErrNotRun,
 				val: T5[T, V, M, N, O]{},
 			},
 		}

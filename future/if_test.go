@@ -1,7 +1,6 @@
 package future
 
 import (
-	"errors"
 	"testing"
 )
 
@@ -23,7 +22,7 @@ func TestGoIfFalse(t *testing.T) {
 		return "foo", nil
 	})
 	wait, err := f1.Wait()
-	if !errors.Is(err, ErrNotRun) {
+	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
 	if wait != "" {
@@ -36,7 +35,7 @@ func TestGo2IfFalse(t *testing.T) {
 		return "foo", "bar", nil
 	})
 	foo, bar, err := f1.Wait()
-	if !errors.Is(err, ErrNotRun) {
+	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
 	if foo != "" || bar != "" {
@@ -62,7 +61,7 @@ func TestGo3IfFalse(t *testing.T) {
 		return "foo", "bar", 1, nil
 	})
 	foo, bar, num, err := f1.Wait()
-	if !errors.Is(err, ErrNotRun) {
+	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
 	if foo != "" || bar != "" || num != 0 {
@@ -75,7 +74,7 @@ func TestGo4IfFalse(t *testing.T) {
 		return "foo", "bar", 1, 2, nil
 	})
 	foo, bar, num, num2, err := f1.Wait()
-	if !errors.Is(err, ErrNotRun) {
+	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
 	if foo != "" || bar != "" || num != 0 || num2 != 0 {
@@ -88,7 +87,7 @@ func TestGo5IfFalse(t *testing.T) {
 		return "foo", "bar", 1, 2, 3, nil
 	})
 	foo, bar, num, num2, num3, err := f1.Wait()
-	if !errors.Is(err, ErrNotRun) {
+	if err != nil {
 		t.Fatalf("got err:%v", err)
 	}
 	if foo != "" || bar != "" || num != 0 || num2 != 0 || num3 != 0 {
